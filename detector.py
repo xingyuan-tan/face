@@ -31,7 +31,7 @@ def encode_known_faces(
         image = face_recognition.load_image_file(filepath)
 
         face_locations = face_recognition.face_locations(image, model=model)
-        face_encodings = face_recognition.face_encodings(image, face_locations)
+        face_encodings = face_recognition.face_encodings(image, face_locations, num_jitters= 100, model="large")
 
         for encoding in face_encodings:
             names.append(name)
@@ -78,7 +78,7 @@ def recognize_faces(
 
 def _recognize_face(unknown_encoding, loaded_encodings):
     boolean_matches = face_recognition.compare_faces(
-        loaded_encodings["encodings"], unknown_encoding
+        loaded_encodings["encodings"], unknown_encoding, tolerance= 0.4
     )
     votes = Counter(
         name
