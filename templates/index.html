@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <title>Video Demostration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <base target="_top">
+  </head>
+  <body>
+    <div class = "container">
+      <h1>Video Demo</h1>
+      <div>
+        <img src="{{ url_for('video_feed') }}">
+      </div>
+
+      <div class="row">
+        <canvas id="dynChart"></canvas>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+
+      const ctx = document.getElementById('dynChart');
+
+      const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'KPI',
+            data: [-1,-1,-1],
+            borderWidth: 5
+          }]
+        },
+        options: {
+          animation: false,
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                type: 'millisecond',
+                displayFormats: {
+                  second: 'HH:mm:ss:SSS'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const url = document.currentScript.src;
+
+      function updateGraph(){
+        fetch(url+'/update_graph')
+          .then(response => response.json())
+          .then(response => {
+            d1 = response
+            myChart.config.data.datasets[0].data = d1[1];
+            myChart.config.data.labels = d1[0];
+            myChart.update();
+          })
+      }
+
+
+      var t=setInterval(updateGraph,1000);
+
+    </script>
+  </body>
+
+  <style>
+    h1 {text-align: center}
+  </style>
+</html>

@@ -1,8 +1,14 @@
 import numpy as np
 import cv2 as cv
 from detector import recognize_faces
+from counter import counter
+
+from time import time
 
 cap = cv.VideoCapture(0)
+
+t = time()
+fps = 0
 
 if not cap.isOpened():
     print("Cannot open camera")
@@ -12,7 +18,8 @@ while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
 
-    output = np.array(recognize_faces(frame))
+    # frame = np.array(recognize_faces(frame, makeup=False))
+    frame, count = counter(frame)
 
     # if frame is read correctly ret is True
     if not ret:
@@ -23,7 +30,11 @@ while True:
     # cv_image = cv.cvtColor(np.array(output), cv.COLOR_RGB2RGB)
 
     # Display the resulting frame
-    cv.imshow('frame', output)
+    cv.imshow('frame', frame)
+
+    print(count)
+    # print("FPS:", 1/(time()-t))
+    t = time()
 
     if cv.waitKey(1) == ord('q'):
         break

@@ -22,7 +22,7 @@ Path("output").mkdir(exist_ok=True)
 Path("validation").mkdir(exist_ok=True)
 
 def encode_known_faces(
-    model: str = "hog", encodings_location: Path = DEFAULT_ENCODINGS_PATH
+    model: str = "cnn", encodings_location: Path = DEFAULT_ENCODINGS_PATH
 ) -> None:
     names = []
     encodings = []
@@ -46,6 +46,7 @@ def recognize_faces(
     # image_location: str,
     model: str = "hog",
     encodings_location: Path = DEFAULT_ENCODINGS_PATH,
+    makeup: bool = False,
 ):
     with encodings_location.open(mode="rb") as f:
         loaded_encodings = pickle.load(f)
@@ -60,6 +61,7 @@ def recognize_faces(
         input_image, input_face_locations
     )
 
+
     pillow_image = Image.fromarray(input_image)
     draw = ImageDraw.Draw(pillow_image)
 
@@ -70,6 +72,34 @@ def recognize_faces(
         if not name:
             name = "Unknown"
         _display_face(draw, bounding_box, name)
+
+    if makeup:
+        face_landmarks_list = face_recognition.face_landmarks(
+            input_image
+        )
+
+        for face_landmarks in face_landmarks_list:
+
+            # Make the eyebrows into a nightmare
+            draw.polygon(face_landmarks['left_eyebrow'], fill=(68, 54, 39, 128))
+            draw.polygon(face_landmarks['right_eyebrow'], fill=(68, 54, 39, 128))
+            draw.line(face_landmarks['left_eyebrow'], fill=(68, 54, 39, 150), width=5)
+            draw.line(face_landmarks['right_eyebrow'], fill=(68, 54, 39, 150), width=5)
+
+            # Gloss the lips
+            draw.polygon(face_landmarks['top_lip'], fill=(150, 0, 0, 128))
+            draw.polygon(face_landmarks['bottom_lip'], fill=(150, 0, 0, 128))
+            draw.line(face_landmarks['top_lip'], fill=(150, 0, 0, 64), width=8)
+            draw.line(face_landmarks['bottom_lip'], fill=(150, 0, 0, 64), width=8)
+
+            # Sparkle the eyes
+            draw.polygon(face_landmarks['left_eye'], fill=(255, 255, 255, 30))
+            draw.polygon(face_landmarks['right_eye'], fill=(255, 255, 255, 30))
+
+            # Apply some eyeliner
+            draw.line(face_landmarks['left_eye'] + [face_landmarks['left_eye'][0]], fill=(0, 0, 0, 110), width=6)
+            draw.line(face_landmarks['right_eye'] + [face_landmarks['right_eye'][0]], fill=(0, 0, 0, 110), width=6)
+
 
     del draw
     # pillow_image.show()
